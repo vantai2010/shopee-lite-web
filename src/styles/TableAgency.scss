@@ -1,0 +1,12 @@
+.tool_container {
+  .tool_container-content {
+    position: relative !important;
+    input {
+    }
+    div {
+      position: absolute !important;
+      right: -50px;
+      top: 0px;
+    }
+  }
+}

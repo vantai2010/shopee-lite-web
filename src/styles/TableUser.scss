@@ -1,0 +1,43 @@
+div {
+  position: relative;
+  z-index: 1;
+  .show_search {
+    position: absolute;
+    top: 53px;
+    width: 40.5%;
+    margin-bottom: 20px;
+    z-index: 10;
+    background-color: #fcfcfc;
+    border-top: none;
+    box-shadow: 0px 0px 2px rgb(203, 199, 199);
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    .autosuggest {
+      .autosuggest_data {
+        cursor: pointer;
+        padding-left: 10px;
+        &:hover {
+          background-color: #ece7e7;
+        }
+      }
+    }
+  }
+}
+table {
+  text-align: center;
+  thead {
+  }
+  tbody {
+    tr {
+      td {
+        .icon_CRUD {
+          font-size: 22px !important;
+          &:hover {
+            color: red;
+            cursor: pointer;
+          }
+        }
+      }
+    }
+  }
+}

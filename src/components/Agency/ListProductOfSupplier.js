@@ -23,8 +23,6 @@ function ListProductOfSupplier() {
     const [selectedTab, setSelectedTab] = useState("Order Status");
 
 
-
-
     const handleExportPDF = () => {
         let doc = new jsPDF();
         doc.text("Hello world!", 10, 10);
@@ -47,10 +45,10 @@ function ListProductOfSupplier() {
             toast.error(language === keyMap.EN ? response.messageEN : response.messageVI)
         }
     }
+
     useEffect(() => {
         getListProducts({ pageSize: 10, pageIndex })
     }, [pageIndex])
-
 
     const handleChangePage = () => {
 

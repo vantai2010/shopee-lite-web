@@ -14,7 +14,7 @@ function ModalDeleteAgency(props) {
     let response = await deleteProductOfSupplierService({ productId: idSelected })
     if (response && response.errCode === 0) {
       handle()
-      getListProducts()
+      getListProducts({ pageSize: 10, pageIndex: 1 })
     } else {
       toast.error(language === keyMap.EN ? response.messageEN : response.messageVI)
     }

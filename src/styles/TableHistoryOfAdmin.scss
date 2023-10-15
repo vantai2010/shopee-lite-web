@@ -1,0 +1,22 @@
+.menu_container {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  background-color: #3734f3;
+  display: flex;
+  width: 50%;
+  align-items: center;
+  justify-content: space-between;
+  &--content {
+    width: 25%;
+    text-align: center;
+    color: #ffffff;
+    cursor: pointer;
+  }
+  &--color {
+    cursor: pointer;
+    background-color: #cccccc;
+    color: #3734f3;
+    font-weight: 500;
+    border-bottom: 5px solid #282727;
+  }
+}

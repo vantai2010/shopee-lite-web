@@ -8,7 +8,7 @@ import { Link } from "react-router-dom";
 
 function Header(props) {
   const { title } = props;
-  const userData = useSelector(state => state.app.userData)
+  const userData = useSelector((state) => state.app.userData);
   const [titlePage, setTitlePage] = useState(false);
   const [linkPage, setLinkPage] = useState(false);
   useEffect(() => {
@@ -37,26 +37,26 @@ function Header(props) {
           <Nav className="me-auto">
             <Nav.Link>
               <Link
-                to={linkPage ? "/admin" : "/agency"}
+                to={linkPage ? "list-agency" : "list-product"}
                 className="text-decoration-none"
               >
-                {titlePage ? "ProductAd" : "Product"}
+                {titlePage ? "Supplier" : "Product"}
               </Link>
             </Nav.Link>
             <Nav.Link>
               <Link
-                to={linkPage ? "/admin/table/user" : "/agency/table/status"}
+                to={linkPage ? "list-user" : "list-transaction"}
                 className="text-decoration-none"
               >
-                {titlePage ? "User" : "Status"}
+                {titlePage ? "User" : "Transaction"}
               </Link>
             </Nav.Link>
             <Nav.Link>
               <Link
-                to={linkPage ? "/admin/table/history" : "/agency"}
+                to={linkPage ? "list-history" : "history"}
                 className="text-decoration-none"
               >
-                {titlePage ? "History" : ""}
+                {titlePage ? "History" : "History"}
               </Link>
             </Nav.Link>
           </Nav>
@@ -65,10 +65,7 @@ function Header(props) {
               <NavDropdown.Item>Vietnamese</NavDropdown.Item>
               <NavDropdown.Item>English</NavDropdown.Item>
             </NavDropdown>
-            <NavDropdown
-              title={userData?.email}
-              id="collapsible-nav-dropdown"
-            >
+            <NavDropdown title={userData?.email} id="collapsible-nav-dropdown">
               <NavDropdown.Item>
                 <Link className="text-decoration-none " to="/">
                   You

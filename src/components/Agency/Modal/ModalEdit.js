@@ -1,22 +1,44 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import { updateProductOfSupplierService } from "../../../services/appService";
-import { keyMap } from "../../../utils/constant";
+import { categoryId, keyMap } from "../../../utils/constant";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
-import "../../../styles/ModalAddNew.scss"
+import "../../../styles/ModalAddNew.scss";
 import { handleFormatArrType } from "../../../utils/formatArrayType";
+import { environment } from "../../../utils/constant";
 
 function ModalEdit(props) {
-
-
+  const [newImage, setNewImage] = useState([]);
+  const [saveId, setSaveId] = useState([]);
   const [arrType, setArrType] = useState([]);
-  const [sizeOfProduct, setSizeOfProduct] = useState([]);
-
   const { show, handle, data, getListProducts } = props;
   const language = useSelector((state) => state.app.language);
-
+  const oldImage = useRef()
+  const handleResetData = () => {
+    if (data && data.productTypeData) {
+      setInputForm({
+        name: data?.name,
+        image: data?.image,
+        price: data?.price,
+        description: data?.description,
+        categoryId: data?.categoryId,
+        quantity: data?.quantity,
+        type: "",
+        imageType: "",
+        size: "",
+        quantitySize: "",
+      });
+      console.log(data.productTypeData)
+      setArrType(data.productTypeData);
+      setNewImage([])
+    }
+    oldImage.current = data?.image
+  }
+  useEffect(() => {
+    handleResetData()
+  }, [data]);
   const [inputForm, setInputForm] = useState({
     name: data?.name,
     image: data?.image,
@@ -50,18 +72,7 @@ function ModalEdit(props) {
   };
 
   const handleUserEdit = async () => {
-    let {
-      name,
-      price,
-      quantity,
-      categoryId,
-      description,
-      image,
-      type,
-      imageType,
-      size,
-      quantitySize,
-    } = inputForm;
+    let { name, price, quantity, categoryId, description, image } = inputForm;
     if (!name.trim()) {
       setErrMessage({
         name:
@@ -80,7 +91,7 @@ function ModalEdit(props) {
       });
       return;
     }
-    if (!price.trim()) {
+    if (!price) {
       setErrMessage({
         name: "",
         image: "",
@@ -98,7 +109,7 @@ function ModalEdit(props) {
       });
       return;
     }
-    if (!quantity.trim()) {
+    if (!quantity) {
       setErrMessage({
         name: "",
         image: "",
@@ -152,7 +163,7 @@ function ModalEdit(props) {
       });
       return;
     }
-    if (image.length === 0) {
+    if (image.length === 0 && newImage.length === 0) {
       setErrMessage({
         name: "",
         image:
@@ -170,6 +181,7 @@ function ModalEdit(props) {
       });
       return;
     }
+
     if (!isNaN(name.trim())) {
       setErrMessage({
         name:
@@ -260,64 +272,14 @@ function ModalEdit(props) {
       });
       return;
     }
-    if (!type.trim()) {
-      setErrMessage({
-        name: "",
-        image: "",
-        price: "",
-        description: "",
-        categoryId: "",
-        quantity: "",
-        type:
-          language === keyMap.EN
-            ? "Please enter this field"
-            : "Vui lòng nhập trường này",
-        imageType: "",
-        size: "",
-        quantitySize: "",
-      });
-      return;
-    }
-    if (!isNaN(type.trim())) {
-      setErrMessage({
-        name: "",
-        image: "",
-        price: "",
-        description: "",
-        categoryId: "",
-        quantity: "",
-        type:
-          language === keyMap.EN
-            ? "This field must not be a number"
-            : "Trường này phải không thể là số",
-        imageType: "",
-        size: "",
-        quantitySize: "",
-      });
-      return;
-    }
-    if (imageType.length === 0) {
-      setErrMessage({
-        name: "",
-        image: "",
-        price: "",
-        description: "",
-        categoryId: "",
-        quantity: "",
-        type: "",
-        imageType:
-          language === keyMap.EN
-            ? "Please select a photo"
-            : "Vui lòng chọn ảnh",
-        size: "",
-        quantitySize: "",
-      });
-      return;
-    }
-    // setInputForm({ ...inputForm, size: sizeOfProduct });
-    let arrTypeFormatted = handleFormatArrType(arrType)
 
-    let response = await updateProductOfSupplierService({ ...inputForm, arrType: arrTypeFormatted });
+    let response = await updateProductOfSupplierService({
+      ...inputForm,
+      newImage: newImage,
+      oldImage: oldImage.current,
+      productId: data.id,
+      arrType: arrType,
+    });
     if (response && response.errCode === 0) {
       getListProducts({ pageSize: 10, pageIndex: 1 });
       handle();
@@ -330,134 +292,37 @@ function ModalEdit(props) {
 
   const handleOnchangeImage = (e) => {
     const files = Array.from(e.target.files);
-    setInputForm({ ...inputForm, image: files })
-  };
-
-  const handleOnchangeImageSize = (e) => {
-    const files = e.target.files; // Lấy danh sách các tệp ảnh đã chọn
-    setInputForm({ ...inputForm, imageType: e.target.files[0] })
-
+    setNewImage(files);
   };
 
   const handleRemoveImage = (index) => {
     const updatedImages = [...inputForm.image];
-    updatedImages.splice(index, 1); // Xóa ảnh theo chỉ số index
-    setInputForm({ ...inputForm, image: updatedImages }); // Cập nhật state inputForm
+    updatedImages.splice(index, 1);
+    setInputForm({ ...inputForm, image: updatedImages });
   };
-
-
+  const handleRemoveImageNew = (index) => {
+    const updatedImages = [...inputForm.image];
+    updatedImages.splice(index, 1);
+    setNewImage({ ...newImage, image: updatedImages });
+  };
   const handleEditArrType = (item) => {
-    setSizeOfProduct(item.size);
-    setInputForm({ ...inputForm, type: item.type, imageType: item.imageType });
-    let newArayyEditType = arrType.filter((itm) => itm.type !== item.type);
-    setArrType(newArayyEditType);
+    if (saveId.length === 0) {
+      setSaveId({ id: item.id, productId: item.productId });
+      setInputForm({
+        ...inputForm,
+        type: item.type,
+        size: item.size,
+        quantitySize: item.quantity,
+      });
+      let newArayyEditType = arrType.filter((itm) => itm.id !== item.id);
+      setArrType(newArayyEditType);
+    } else {
+      toast.error("Vui lòng chỉ sửa 1 type duy nhất");
+    }
   };
   const handleDeleteArrType = (item) => {
-    let newArrType = arrType.filter((itm) => itm.type !== item.type);
+    let newArrType = arrType.filter((itm) => itm.id !== item.id);
     setArrType(newArrType);
-  };
-  const handleAddSizeOfProduct = () => {
-    if (!inputForm.size.trim()) {
-      setErrMessage({
-        name: "",
-        image: "",
-        price: "",
-        description: "",
-        categoryId: "",
-        quantity: "",
-        type: "",
-        imageType: "",
-        size:
-          language === keyMap.EN
-            ? "Please enter this field"
-            : "Vui lòng nhập trường này",
-        quantitySize: "",
-      });
-      return;
-    }
-    if (!inputForm.quantitySize.trim()) {
-      setErrMessage({
-        name: "",
-        image: "",
-        price: "",
-        description: "",
-        categoryId: "",
-        quantity: "",
-        type: "",
-        imageType: "",
-        size: "",
-        quantitySize:
-          language === keyMap.EN
-            ? "Please enter this field"
-            : "Vui lòng nhập trường này",
-      });
-      return;
-    }
-    if (!isNaN(inputForm.size.trim())) {
-      setErrMessage({
-        name: "",
-        image: "",
-        price: "",
-        description: "",
-        categoryId: "",
-        quantity: "",
-        type: "",
-        imageType: "",
-        size:
-          language === keyMap.EN
-            ? "This field must not be a number"
-            : "Trường này phải không thể là số",
-        quantitySize: "",
-      });
-      return;
-    }
-    if (isNaN(inputForm.quantitySize.trim())) {
-      setErrMessage({
-        name: "",
-        image: "",
-        price: "",
-        description: "",
-        categoryId: "",
-        quantity: "",
-        type: "",
-        imageType: "",
-        size: "",
-        quantitySize:
-          language === keyMap.EN
-            ? "This field must be number"
-            : "Trường này phải là số",
-      });
-      return;
-    }
-    if (!(inputForm.quantitySize % 1 === 0)) {
-      setErrMessage({
-        name: "",
-        image: "",
-        price: "",
-        description: "",
-        categoryId: "",
-        quantity: "",
-        type: "",
-        imageType: "",
-        size: "",
-        quantitySize:
-          language === keyMap.EN
-            ? "This field must be integer"
-            : "Trường này phải là số nguyên",
-      });
-      return;
-    }
-    let newSideOfProduct = [...sizeOfProduct];
-    newSideOfProduct.push({
-      size: inputForm.size,
-      quantitySize: inputForm.quantitySize,
-    });
-    setSizeOfProduct(newSideOfProduct);
-    setInputForm({
-      ...inputForm,
-      size: "",
-      quantitySize: "",
-    });
   };
 
   const handleAddArrType = () => {
@@ -497,7 +362,7 @@ function ModalEdit(props) {
       });
       return;
     }
-    if (inputForm.imageType.length === 0) {
+    if (!inputForm.quantitySize.trim()) {
       setErrMessage({
         name: "",
         image: "",
@@ -506,51 +371,83 @@ function ModalEdit(props) {
         categoryId: "",
         quantity: "",
         type: "",
-        imageType:
-          language === keyMap.EN
-            ? "Please select a photo"
-            : "Vui lòng chọn ảnh",
+        imageType: "",
         size: "",
-        quantitySize: "",
+        quantitySize:
+          language === keyMap.EN
+            ? "Please enter this field"
+            : "Vui lòng nhập trường này",
       });
       return;
     }
+    if (isNaN(inputForm.quantitySize)) {
+      setErrMessage({
+        name: "",
+        image: "",
+        price: "",
+        description: "",
+        categoryId: "",
+        quantity: "",
+        type: "",
+        imageType: "",
+        size: "",
+        quantitySize:
+          language === keyMap.EN
+            ? "This field must be a numberic"
+            : "Trường này phải là số",
+      });
+      return;
+    }
+    if (!(inputForm.quantitySize % 1 === 0)) {
+      setErrMessage({
+        name: "",
+        image: "",
+        price: "",
+        description: "",
+        categoryId: "",
+        quantity: "",
+        type: "",
+        imageType: "",
+        size: "",
+        quantitySize:
+          language === keyMap.EN
+            ? "This field must be a integer"
+            : "Trường này phải là số nguyên",
+      });
+      return;
+    }
+
     let newArrSizeType = [...arrType];
     newArrSizeType.push({
+      id: saveId.id,
+      productId: saveId.productId,
       type: inputForm.type,
-      imageType: inputForm.imageType,
-      size: sizeOfProduct,
+      size: inputForm.size?.trim() === "" ? null : inputForm.size,
+      quantity: inputForm.quantitySize,
     });
     setArrType(newArrSizeType);
-    setSizeOfProduct([]);
-    setInputForm({ ...inputForm, type: "", imageType: "" });
-  };
 
-  const handleEditNewSizeOfProduct = (item) => {
+    setSaveId([]);
     setInputForm({
       ...inputForm,
-      size: item.size,
-      quantitySize: item.quantitySize,
+      type: "",
+      imageType: "",
+      size: "",
+      quantitySize: "",
     });
-    let newSize = sizeOfProduct.filter((itm) => itm.size !== item.size);
-    setSizeOfProduct(newSize);
   };
 
-  const handleDeleteNewSizeOfProduct = (item) => {
-    let newArrDeleteSizeOfProduct = sizeOfProduct.filter(
-      (itm) => itm.size !== item.size
-    );
-    setSizeOfProduct(newArrDeleteSizeOfProduct);
-  };
+  // console.log("new Imgae", newImage)
+
   return (
-    <Modal show={show} onHide={handle}>
+    <Modal size="lg" show={show} onHide={() => { handleResetData(); handle() }}>
       <Modal.Header closeButton>
         <Modal.Title>Edit a User</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <div className="container">
           <div className="row">
-            <div className="col-6">
+            <div className="col-3">
               <label>Name</label>
               <input
                 required
@@ -561,7 +458,7 @@ function ModalEdit(props) {
               />
               <p style={{ color: "red" }}>{errMessage.name}</p>
             </div>
-            <div className="col-6">
+            <div className="col-3">
               <label>price</label>
               <input
                 value={inputForm.price}
@@ -571,7 +468,7 @@ function ModalEdit(props) {
               />
               <p style={{ color: "red" }}>{errMessage.price}</p>
             </div>
-            <div className="col-6">
+            <div className="col-3">
               <label>quantity</label>
               <input
                 value={inputForm.quantity}
@@ -581,15 +478,22 @@ function ModalEdit(props) {
               />
               <p style={{ color: "red" }}>{errMessage.quantity}</p>
             </div>
-            <div className="col-6">
+            <div className="col-3">
               <label>category</label>
-              <input
-                value={inputForm.quantity}
+              <select
+                value={inputForm.categoryId}
                 onChange={(e) => handleOnchange("categoryId", e)}
                 className="form-control"
-                type="text"
-              />
-              <p style={{ color: "red" }}>{errMessage.quantity}</p>
+              >
+                <option value="">Select a category</option>
+
+                {Object.values(categoryId).map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </select>
+              <p style={{ color: "red" }}>{errMessage.categoryId}</p>
             </div>
             <div className="col-12">
               <label>description</label>
@@ -603,6 +507,7 @@ function ModalEdit(props) {
             </div>
 
             <div
+              className="col-12"
               style={{
                 border: "1px solid #cccccc",
                 borderRadius: "5px",
@@ -617,7 +522,7 @@ function ModalEdit(props) {
                   alignItems: "center",
                 }}
               >
-                <div className="col-5">
+                <div className="col-12">
                   <label>Type</label>
                   <input
                     value={inputForm.type}
@@ -627,54 +532,8 @@ function ModalEdit(props) {
                   />
                   <p style={{ color: "red" }}>{errMessage.type}</p>
                 </div>
-
-                <div className="col-5">
-                  <p style={{ color: "red" }}>{errMessage.imageType}</p>
-                  <div
-                    className="preview-img-container"
-                    style={{ position: "relative" }}
-                  >
-                    <input
-                      id="choise-image-type"
-                      className="form-control"
-                      type="file"
-                      multiple
-                      hidden
-                      onChange={(e) => handleOnchangeImageSize(e)}
-                    />
-                    <label
-                      htmlFor="choise-image-type"
-                      className="btn-choise-image"
-                      style={{
-                        display: "inline-block",
-                        width: "140px",
-                        padding: "10px 15px",
-                        backgroundColor: "#007bff",
-                        color: "#fff",
-                        cursor: "pointer",
-                      }}
-                    >
-                      Choose Image
-                      <i
-                        className="fas fa-upload"
-                        style={{ marginLeft: "5px" }}
-                      ></i>
-                    </label>
-                    <div
-                      className="preview-image"
-                      style={{
-                        display: "flex",
-                        flexWrap: "wrap",
-                        marginTop: "10px",
-                      }}
-                    ></div>
-                  </div>
-                </div>
               </div>
-              <div>
-                {inputForm.imageType && <img style={{ objectFit: "cover", with: "120px", height: "120px", border: "1px solid #cccccc", borderRadius: "5px" }}
-                  src={URL.createObjectURL(inputForm.imageType)} />}
-              </div>
+              <div></div>
               <div
                 style={{
                   display: "flex",
@@ -704,74 +563,17 @@ function ModalEdit(props) {
                   <p style={{ color: "red" }}>{errMessage.quantitySize}</p>
                 </div>
               </div>
-              <div>
-                {inputForm.size !== "" && inputForm.quantitySize !== "" && (
-                  <div>
-                    <button
-                      style={{
-                        backgroundColor: "#2d2aea",
-                        border: "none",
-                        width: "50px",
-                        color: "#ffffff",
-                      }}
-                      onClick={() => handleAddSizeOfProduct()}
-                    >
-                      +
-                    </button>
-                  </div>
-                )}
-              </div>
-              {sizeOfProduct &&
-                sizeOfProduct.length > 0 &&
-                sizeOfProduct.map((item, index) => {
-                  return (
-                    <div key={index}>
-                      <span>
-                        Size: <b>{item.size}</b>---
-                      </span>
-                      <span
-                        style={{ display: "inline-block", marginTop: "10px" }}
-                      >
-                        quantitySize: <b>{item.quantitySize}</b>
-                      </span>
-                      <button
-                        style={{
-                          backgroundColor: "#2d2aea",
-                          border: "none",
-                          color: "#ffffff",
-                          borderRadius: "5px",
-                        }}
-                        onClick={() => handleEditNewSizeOfProduct(item)}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        style={{
-                          marginLeft: "5px",
-                          backgroundColor: "#2d2aea",
-                          border: "none",
-                          color: "#ffffff",
-                          borderRadius: "5px",
-                        }}
-                        onClick={() => handleDeleteNewSizeOfProduct(item)}
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  );
-                })}
-              {sizeOfProduct && sizeOfProduct.length > 0 && (
-                <button
-                  style={{
-                    backgroundColor: "#2d2aea",
-                    border: "none",
-                    color: "#ffffff",
-                  }}
-                  onClick={() => handleAddArrType()}
-                >
-                  Thêm type
-                </button>
-              )}
+              <div></div>
+              <button
+                style={{
+                  backgroundColor: "#2d2aea",
+                  border: "none",
+                  color: "#ffffff",
+                }}
+                onClick={() => handleAddArrType()}
+              >
+                Thêm type
+              </button>
             </div>
 
             <div>
@@ -784,27 +586,14 @@ function ModalEdit(props) {
                         <span>
                           Type: <b>{item.type}</b>
                         </span>
-                        <span className="imageType_string">
-                          imageSize:
-                          <b
-                          >
-                            {item.imageType}
-                          </b>
-                        </span>
-                        {item.size &&
-                          item.size.length > 0 &&
-                          item.size.map((itm) => {
-                            return (
-                              <div style={{ display: "flex" }}>
-                                <span>
-                                  Size: <b>{itm.size}---</b>
-                                </span>
-                                <span>
-                                  quantitySize:<b>{itm.quantitySize}</b>
-                                </span>
-                              </div>
-                            );
-                          })}
+                        <div style={{ display: "flex" }}>
+                          <span>
+                            Size: <b>{item.size}---</b>
+                          </span>
+                          <span>
+                            quantitySize:<b>{item.quantity}</b>
+                          </span>
+                        </div>
                       </div>
                       <div>
                         <button
@@ -868,28 +657,68 @@ function ModalEdit(props) {
                 </label>
                 <div
                   className="preview-image"
-                  style={{ marginTop: " 10px", display: "grid", grid: "auto / auto auto auto" }}
+                  style={{
+                    marginTop: " 10px",
+                    display: "grid",
+                    grid: "auto / auto auto auto",
+                  }}
                 >
                   {inputForm.image &&
                     inputForm.image.map((imgUrl, index) => (
-                      <div
-                        key={index}
-                        className="image-preview-item"
-                      >
-                        <img style={{
-                          backgroundSize: "cover",
-                          objectFit: "cover",
-                          width: "120px",
-                          height: "120px",
-                          marginRight: "10px",
-                          marginBottom: "10px",
-                          borderRadius: "5px",
-                          position: "relative",
-                          border: "1px solid #cccccc"
-                        }} src={URL.createObjectURL(imgUrl)} />
+                      <div key={index} className="image-preview-item">
+                        <img
+                          style={{
+                            backgroundSize: "cover",
+                            objectFit: "cover",
+                            width: "120px",
+                            height: "120px",
+                            marginRight: "10px",
+                            marginBottom: "10px",
+                            borderRadius: "5px",
+                            position: "relative",
+                            border: "1px solid #cccccc",
+                          }}
+                          src={`${environment.BASE_URL_BE_IMAGE}${imgUrl}`}
+                        />
                         <button
                           className="btn-remove-image"
                           onClick={() => handleRemoveImage(index)}
+                          style={{
+                            position: "absolute",
+                            top: "0px",
+                            right: "10px",
+                            backgroundColor: "#cccccc",
+                            color: "red",
+                            borderTopRightRadius: "5px",
+                            padding: "5px",
+                            cursor: "pointer",
+                            border: "none",
+                          }}
+                        >
+                          X
+                        </button>
+                      </div>
+                    ))}
+                  {newImage &&
+                    newImage.map((imgUrl, index) => (
+                      <div key={index} className="image-preview-item">
+                        <img
+                          style={{
+                            backgroundSize: "cover",
+                            objectFit: "cover",
+                            width: "120px",
+                            height: "120px",
+                            marginRight: "10px",
+                            marginBottom: "10px",
+                            borderRadius: "5px",
+                            position: "relative",
+                            border: "1px solid #cccccc",
+                          }}
+                          src={URL.createObjectURL(imgUrl)}
+                        />
+                        <button
+                          className="btn-remove-image"
+                          onClick={() => handleRemoveImageNew(index)}
                           style={{
                             position: "absolute",
                             top: "0px",
@@ -913,7 +742,7 @@ function ModalEdit(props) {
         </div>
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="secondary" onClick={handle}>
+        <Button variant="secondary" onClick={() => { handleResetData(); handle() }}>
           Close
         </Button>
         <Button variant="primary" onClick={handleUserEdit}>

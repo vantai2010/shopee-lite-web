@@ -6,23 +6,26 @@ import { RiDeleteBin6Line } from "react-icons/ri";
 import ModalDetails from "../Modal/ModalDetails";
 import ModalEdit from "../Modal/ModalEdit";
 import ModalDelete from "../Modal/ModalDelete";
-import "../../../styles/Tabs.scss"
-import "../../../styles/TableAgency.scss"
+import ModalAddNewVoucher from "../Modal/ModalAddNewVoucher";
+import "../../../styles/Tabs.scss";
+import "../../../styles/TableAgency.scss";
+import { environment } from "../../../utils/constant";
 
 function TableListProduct({ data, getListProducts }) {
   const [isHideModalDetailsAgency, setIsHideModalDetailsAgency] = useState(false);
   const [isHideModalEditAgency, setIsHideModalEditAgency] = useState(false);
   const [isHideModalDeleteAgency, setIsHideModalDeleteAgency] = useState(false);
-  const [listDetailsAgency, setListDetailsAgency] = useState({});
-  const [listEditAgency, setListEditAgency] = useState({});
-  const [listDeleteAgency, setListDeleteAgency] = useState({});
-  const productSelected = useRef()
+  const [isHideModalAddNewVoucher, setIsShowModalAddNewVoucher] = useState(false);
+  // const [listDetailsAgency, setListDetailsAgency] = useState({});
+  // const [listEditAgency, setListEditAgency] = useState({});
+  // const [listDeleteAgency, setListDeleteAgency] = useState({});
+  const productSelected = useRef();
   const handleHideModalDetailsAgency = () => {
     setIsHideModalDetailsAgency(false);
   };
 
   const handleShowAgency = (item) => {
-    setListDetailsAgency(item);
+    // setListDetailsAgency(item);
     setIsHideModalDetailsAgency(true);
   };
 
@@ -30,9 +33,12 @@ function TableListProduct({ data, getListProducts }) {
     setIsHideModalEditAgency(false);
   };
 
+  const handleHideModalAddNewVoucher = () => {
+    setIsShowModalAddNewVoucher(false)
+  }
   const handleShowEditAgency = (item) => {
     setIsHideModalEditAgency(true);
-    setListEditAgency(item);
+    // setListEditAgency(item);
   };
 
   const handleHideModalDeleteAgency = () => {
@@ -41,17 +47,22 @@ function TableListProduct({ data, getListProducts }) {
 
   const handleShowDeleteAgency = (item) => {
     setIsHideModalDeleteAgency(true);
-    setListDeleteAgency(item);
+    // setListDeleteAgency(item);
   };
 
   const handleDeleteProduct = (item) => {
-    productSelected.current = item
-    handleShowDeleteAgency(item)
+    productSelected.current = item;
+    handleShowDeleteAgency(item);
+  };
+
+  const handleShowModalAddNewVoucher = () => {
+    setIsShowModalAddNewVoucher(true);
   }
+
+
 
   return (
     <>
-
       <Table striped bordered hover variant="light">
         <thead>
           <tr>
@@ -60,6 +71,7 @@ function TableListProduct({ data, getListProducts }) {
             <th>category</th>
             <th>Quantity</th>
             <th>Bought</th>
+            <th>Voucher</th>
             <th>Details</th>
             <th>Edit</th>
             <th>Delete</th>
@@ -76,16 +88,23 @@ function TableListProduct({ data, getListProducts }) {
                   <td>{item.categoryId}</td>
                   <td>{item.quantity}</td>
                   <td>{item.bought}</td>
+                  <td onClick={() => { productSelected.current = item; handleShowModalAddNewVoucher() }} style={{ cursor: "pointer" }}>+</td>
                   <td>
                     <FiUser
                       className="icon_CRUD"
-                      onClick={() => { productSelected.current = item; handleShowAgency(item) }}
+                      onClick={() => {
+                        productSelected.current = item;
+                        handleShowAgency(item);
+                      }}
                     />
                   </td>
                   <td>
                     <FiEdit
                       className="icon_CRUD"
-                      onClick={() => { productSelected.current = item; handleShowEditAgency(item) }}
+                      onClick={() => {
+                        productSelected.current = item;
+                        handleShowEditAgency(item);
+                      }}
                     />
                   </td>
                   <td>
@@ -112,11 +131,14 @@ function TableListProduct({ data, getListProducts }) {
         <ModalDelete
           show={isHideModalDeleteAgency}
           handle={handleHideModalDeleteAgency}
-          idSelected={productSelected.current?.id}
+          productSelected={productSelected.current}
           getListProducts={getListProducts}
         />
+        <ModalAddNewVoucher
+          show={isHideModalAddNewVoucher}
+          productSelected={productSelected.current}
+          handle={handleHideModalAddNewVoucher} />
       </Table>
-
     </>
   );
 }

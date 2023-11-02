@@ -8,7 +8,7 @@ import { createNewProductOfSupplierService } from "../../../services/appService"
 import { toast } from "react-toastify";
 import { type } from "@testing-library/user-event/dist/type";
 import "../../../styles/ModalAddNew.scss";
-import { handleFormatArrType } from "../../../utils/formatArrayType"
+import { handleFormatArrType } from "../../../utils/formatArrayType";
 
 function ModalAddNewProduct({ show, handleClose, getListProducts }) {
   const [arrType, setArrType] = useState([]);
@@ -39,9 +39,6 @@ function ModalAddNewProduct({ show, handleClose, getListProducts }) {
     quantitySize: "",
   });
 
-  const handleUserEdit = async () => {
-    // let res = await PutEditUser(firstName, lastName);
-  };
 
   const handleOnchange = (type, event) => {
     setInputForm({
@@ -50,16 +47,14 @@ function ModalAddNewProduct({ show, handleClose, getListProducts }) {
     });
   };
 
-
   const handleOnchangeImage = (e) => {
     const files = Array.from(e.target.files);
-    setInputForm({ ...inputForm, image: files })
+    setInputForm({ ...inputForm, image: files });
   };
 
   const handleOnchangeImageSize = (e) => {
     const files = e.target.files; // Lấy danh sách các tệp ảnh đã chọn
-    setInputForm({ ...inputForm, imageType: e.target.files[0] })
-
+    setInputForm({ ...inputForm, imageType: e.target.files[0] });
   };
 
   const handleRemoveImage = (index) => {
@@ -188,7 +183,7 @@ function ModalAddNewProduct({ show, handleClose, getListProducts }) {
       });
       return;
     }
-    if (sizeOfProduct.find(item => item.size === inputForm.size)) {
+    if (sizeOfProduct.find((item) => item.size === inputForm.size)) {
       setErrMessage({
         name: "",
         image: "",
@@ -263,29 +258,70 @@ function ModalAddNewProduct({ show, handleClose, getListProducts }) {
       });
       return;
     }
-    // if (inputForm.imageType.length === 0) {
-    //   setErrMessage({
-    //     name: "",
-    //     image: "",
-    //     price: "",
-    //     description: "",
-    //     categoryId: "",
-    //     quantity: "",
-    //     type: "",
-    //     imageType:
-    //       language === keyMap.EN
-    //         ? "Please select a photo"
-    //         : "Vui lòng chọn ảnh",
-    //     size: "",
-    //     quantitySize: "",
-    //   });
-    //   return;
-    // }
-
-    let newArrType = [...arrType]
-    newArrType.push({ type: inputForm.type, size: sizeOfProduct })
+    if (!inputForm.quantitySize.trim()) {
+      setErrMessage({
+        name: "",
+        image: "",
+        price: "",
+        description: "",
+        categoryId: "",
+        quantity: "",
+        type: "",
+        imageType: "",
+        size: "",
+        quantitySize:
+          language === keyMap.EN
+            ? "Please enter this field"
+            : "Vui lòng nhập trường này",
+      });
+      return;
+    }
+    if (isNaN(inputForm.quantitySize)) {
+      setErrMessage({
+        name: "",
+        image: "",
+        price: "",
+        description: "",
+        categoryId: "",
+        quantity: "",
+        type: "",
+        imageType: "",
+        size: "",
+        quantitySize:
+          language === keyMap.EN
+            ? "This field must be a numberic"
+            : "Trường này phải là số",
+      });
+      return;
+    }
+    if (!(inputForm.quantitySize % 1 === 0)) {
+      setErrMessage({
+        name: "",
+        image: "",
+        price: "",
+        description: "",
+        categoryId: "",
+        quantity: "",
+        type: "",
+        imageType: "",
+        size: "",
+        quantitySize:
+          language === keyMap.EN
+            ? "This field must be a integer"
+            : "Trường này phải là số nguyên",
+      });
+      return;
+    }
+    let arrSizeOfProduct = []
+    if (sizeOfProduct.length > 0) {
+      arrSizeOfProduct = sizeOfProduct
+    } else {
+      arrSizeOfProduct.push({ quantitySize: inputForm.quantitySize })
+    }
+    let newArrType = [...arrType];
+    newArrType.push({ type: inputForm.type, size: arrSizeOfProduct });
     setArrType(newArrType);
-    setInputForm({ ...inputForm, type: "", imageType: "" });
+    setInputForm({ ...inputForm, type: "", quantitySize: "" });
     setSizeOfProduct([]);
   };
 
@@ -295,7 +331,6 @@ function ModalAddNewProduct({ show, handleClose, getListProducts }) {
   };
 
   const handleCreateProduct = async () => {
-
     let {
       name,
       price,
@@ -401,9 +436,10 @@ function ModalAddNewProduct({ show, handleClose, getListProducts }) {
     if (image.length === 0) {
       setErrMessage({
         name: "",
-        image: language === keyMap.EN
-          ? "Please select a photo"
-          : "Vui lòng chọn ảnh",
+        image:
+          language === keyMap.EN
+            ? "Please select a photo"
+            : "Vui lòng chọn ảnh",
         price: "",
         description: "",
         categoryId: "",
@@ -506,14 +542,11 @@ function ModalAddNewProduct({ show, handleClose, getListProducts }) {
       return;
     }
 
-
-    let arrTypeFormatted = handleFormatArrType(arrType)
-    console.log(arrTypeFormatted, inputForm)
+    let arrTypeFormatted = handleFormatArrType(arrType);
     let response = await createNewProductOfSupplierService({
       ...inputForm,
-      arrType: arrTypeFormatted
+      arrType: arrTypeFormatted,
     });
-    console.log(response);
     if (response && response.errCode === 0) {
       getListProducts({ pageSize: 10, pageIndex: 1 });
       handleCloseModal();
@@ -654,10 +687,19 @@ function ModalAddNewProduct({ show, handleClose, getListProducts }) {
                   </div>
                 </div>
               </div>
-              <div >
-                {inputForm.imageType && <img style={{ objectFit: "cover", with: "120px", height: "120px", border: "1px solid #cccccc", borderRadius: "5px" }}
-                  src={URL.createObjectURL(inputForm.imageType)} />}
-
+              <div>
+                {inputForm.imageType && (
+                  <img
+                    style={{
+                      objectFit: "cover",
+                      with: "120px",
+                      height: "120px",
+                      border: "1px solid #cccccc",
+                      borderRadius: "5px",
+                    }}
+                    src={URL.createObjectURL(inputForm.imageType)}
+                  />
+                )}
               </div>
               <div
                 style={{
@@ -734,34 +776,36 @@ function ModalAddNewProduct({ show, handleClose, getListProducts }) {
                     </div>
                   );
                 })}
-              <button style={{ border: "none", backgroundColor: "#2d2aea", color: "#ffffff", marginBottom: "10px", borderRadius: "5px" }} onClick={handleAddArrType}>Them Type</button>
+              <button
+                style={{
+                  border: "none",
+                  backgroundColor: "#2d2aea",
+                  color: "#ffffff",
+                  marginBottom: "10px",
+                  borderRadius: "5px",
+                }}
+                onClick={handleAddArrType}
+              >
+                Them Type
+              </button>
             </div>
             <div>
               {arrType &&
                 arrType.length > 0 &&
                 arrType.map((item, index) => {
-
                   return (
                     <div key={index}>
                       <div style={{ display: "flex", flexDirection: "column" }}>
                         <span>
                           Type: <b>{item.type}</b>
                         </span>
-                        <span className="imageType_string">
-                          imageSize:
-                          <b
-                          >
-                            {/* {item.image} */}
-                          </b>
-                        </span>
                         {item.size &&
                           item.size.length > 0 &&
                           item.size.map((itm) => {
-
                             return (
                               <div style={{ display: "flex" }}>
                                 <span>
-                                  Size:<b >{itm.size}---</b>
+                                  Size:<b>{itm.size}---</b>
                                 </span>
                                 <span>
                                   quantitySize:<b>{itm.quantitySize}</b>
@@ -779,7 +823,6 @@ function ModalAddNewProduct({ show, handleClose, getListProducts }) {
                             marginLeft: "5px",
                           }}
                           onClick={() => handleDeleteArrType(item)}
-
                         >
                           Xóa Type
                         </button>
@@ -824,25 +867,29 @@ function ModalAddNewProduct({ show, handleClose, getListProducts }) {
                 </label>
                 <div
                   className="preview-image"
-                  style={{ marginTop: " 10px", display: "grid", grid: "auto / auto auto auto" }}
+                  style={{
+                    marginTop: " 10px",
+                    display: "grid",
+                    grid: "auto / auto auto auto",
+                  }}
                 >
                   {inputForm.image &&
                     inputForm.image.map((imgUrl, index) => (
-                      <div
-                        key={index}
-                        className="image-preview-item"
-                      >
-                        <img style={{
-                          backgroundSize: "cover",
-                          objectFit: "cover",
-                          width: "120px",
-                          height: "120px",
-                          marginRight: "10px",
-                          marginBottom: "10px",
-                          borderRadius: "5px",
-                          position: "relative",
-                          border: "1px solid #cccccc"
-                        }} src={URL.createObjectURL(imgUrl)} />
+                      <div key={index} className="image-preview-item">
+                        <img
+                          style={{
+                            backgroundSize: "cover",
+                            objectFit: "cover",
+                            width: "120px",
+                            height: "120px",
+                            marginRight: "10px",
+                            marginBottom: "10px",
+                            borderRadius: "5px",
+                            position: "relative",
+                            border: "1px solid #cccccc",
+                          }}
+                          src={URL.createObjectURL(imgUrl)}
+                        />
                         <button
                           className="btn-remove-image"
                           onClick={() => handleRemoveImage(index)}

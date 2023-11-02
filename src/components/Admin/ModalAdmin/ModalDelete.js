@@ -1,19 +1,19 @@
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
-import { deleteProductOfSupplierService } from "../../../services/appService";
+import { deleteProductOfSupplierService, deleteUserByAdminService } from "../../../services/appService";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import { keyMap } from "../../../utils/constant";
 
 
 
-function ModalDeleteAgency(props) {
-  const { show, handle, productSelected, getListProducts } = props;
+function ModalDelete(props) {
+  const { show, handle, userSelected, getListUsers, currentRole } = props;
   const language = useSelector(state => state.app.language)
   const handleDelete = async () => {
-    let response = await deleteProductOfSupplierService({ productId: productSelected.id, imageProduct: productSelected.image })
+    let response = await deleteUserByAdminService(userSelected.id)
     if (response && response.errCode === 0) {
-      await getListProducts({ pageSize: 10, pageIndex: 1 });
+      await getListUsers(currentRole);
       handle()
     } else {
       toast.error(language === keyMap.EN ? response.messageEN : response.messageVI)
@@ -45,4 +45,4 @@ function ModalDeleteAgency(props) {
   );
 }
 
-export default ModalDeleteAgency;
+export default ModalDelete;

@@ -1,0 +1,85 @@
+.header_container{
+    .header_content{
+        .header_responsive{
+            .header_nav{
+                .header_notifical{
+                    position: relative;
+                    .icon_notifical{
+                        font-size: 25px ;
+                        cursor: pointer;
+                    }
+                    .text_notifical{
+                        position: absolute;
+                        width: 20px;
+                        height: 20px;
+                        background-color: red;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        color: #fff;
+                        border-radius: 50%;
+                        top: 2px;
+                        right: -3px;
+                        cursor: pointer;
+                    }
+                    .hover_notifical{  
+                        display: none; 
+                        position:absolute;
+                        width: 500px;
+                        max-height:500px;
+                        border:1px solid #ccc;
+                        top: 40px;
+                        right: -10px;
+                        background-color: #fff;
+                        padding: 10px 10px 0px;
+                        border-radius: 5px;
+                        overflow: auto;
+                        word-wrap: break-word;
+                        box-shadow: 3px 3px 3px #b8b7b7;
+                }
+                &::after{
+                    content: "";
+                    width: 0;
+                    height: 0;
+                    border-left: 10px solid transparent;
+                    border-right: 10px solid transparent;
+                    border-bottom: 10px solid #fff;
+                    position: absolute;
+                    top: 31px;
+                    right: 2px;
+                    z-index: 10;
+                    display: none;
+                }
+                &::before{
+                    content: "";
+                    width: 0;
+                    height: 0;
+                    border-left: 12px solid transparent;
+                    border-right: 12px solid transparent;
+                    border-bottom: 12px solid #ccc;
+                    position: absolute;
+                    top: 29px;
+                    right: -1px;
+                    z-index: 10;
+                    display: none;
+
+                   
+                }
+                &:hover {
+                    .hover_notifical{
+                        display: block;
+                    }
+                    &::after{
+                        display: block;
+                    }
+                    &::before{
+                        display: block;
+                    }
+
+                }
+
+            }
+        }
+    }
+}
+}

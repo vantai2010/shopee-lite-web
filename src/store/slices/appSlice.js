@@ -28,6 +28,7 @@ const initialState = {
     language: keyMap.VI,
     isLoading: false,
     isLogin: false,
+    notifySocket: null,
     userData: {}
 }
 
@@ -37,7 +38,14 @@ export const appSlice = createSlice({
     reducers: {
         changeLanguage: (state, action) => {
             state.language = action.payload
-        }
+        },
+        handleConnectSocketNotify: (state, action) => {
+            state.notifySocket = action.payload
+        },
+        handleDisConnectSocketNotify: (state, action) => {
+            state.notifySocket?.disconnect()
+            state.notifySocket = null
+        },
     },
     extraReducers: {
         [fetchLoginWithTokenThunk.pending]: (state, action) => {
@@ -66,6 +74,6 @@ export const appSlice = createSlice({
 })
 
 
-export const { changeLanguage, } = appSlice.actions
+export const { changeLanguage, handleConnectSocketNotify, handleDisConnectSocketNotify } = appSlice.actions
 
 export default appSlice.reducer

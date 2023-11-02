@@ -4,7 +4,7 @@ import { Outlet, useNavigate } from "react-router-dom";
 function Admin() {
   const navigate = useNavigate();
   useEffect(() => {
-    navigate("list-history");
+    navigate("/admin/list-user");
   }, []);
   return (
     <>

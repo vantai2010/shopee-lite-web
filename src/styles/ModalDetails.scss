@@ -1,0 +1,11 @@
+.modal_content {
+  &--child {
+    div {
+      display: flex;
+      p {
+        margin-left: 10px;
+        font-weight: 500;
+      }
+    }
+  }
+}
